@@ -1,56 +1,74 @@
 Text Classification
 -------------------------------------------------------------------------
-the purpose of this repository is to explore text classification methods in NLP with deep learning.
+The purpose of this repository is to explore text classification methods in NLP with deep learning.
 
-UPDATE: 
+#### Update: 
 
-1. <a href='https://github.com/brightmart/ai_law'>
-    Apply AI in law cases task(AI_LAW): Predict the name of crimes(accusations), relevant-articles given facts of law cases</a>, has been released 
+Try bert model for multi-label classification, please check session #Models Detail, 3) Bert.
+ 
+<a href='https://github.com/brightmart/nlp_chinese_corpus'>Large Amount of Chinese Corpus for NLP Available!</a>
 
-2. <a href='https://github.com/brightmart/nlu_sim'>sentence similarity project has been released</a> you can check it if you like.
+Google's BERT achieved new state of art result on more than 10 tasks in NLP using pre-train in language model then 
 
-3. if you want to try a model now, you can go to folder 'a02_TextCNN', run 'python -u p7_TextCNN_train.py', it will use sample data to train a model, and print loss and F1 score periodically.
+fine-tuning. <a href='https://github.com/brightmart/bert_language_understanding'>Pre-train TexCNN: idea from BERT for language understanding with running code and data set</a>
 
-it has all kinds of baseline models for text classificaiton.
 
-it also support for multi-label classification where multi label associate with an sentence or document.
+#### Introduction
+it has all kinds of baseline models for text classification.
 
-although many of these models are simple, and may not get you to top level of the task.but some of these models are very classic, so they may be good to serve as baseline models.
+it also support for multi-label classification where multi labels associate with an sentence or document.
 
-each model has a test function under model class. you can run it to performance toy task first. the model is indenpendent from dataset.
+although many of these models are simple, and may not get you to top level of the task. but some of these models are very 
+
+classic, so they may be good to serve as baseline models. each model has a test function under model class. you can run 
+
+it to performance toy task first. the model is independent from data set.
 
 <a href='https://github.com/brightmart/text_classification/blob/master/multi-label-classification.pdf'>check here for formal report of large scale multi-label text classification with deep learning</a>
 
-serveral modes here can also be used for modelling question answering (with or without context), or to do sequences generating. 
+several models here can also be used for modelling question answering (with or without context), or to do sequences generating. 
 
-we explore two seq2seq model(seq2seq with attention,transformer-attention is all you need) to do text classification. and these two models can also be used for sequences generating and other tasks. if you task is a multi-label classification, you can cast the problem to sequences generating.
+we explore two seq2seq model(seq2seq with attention,transformer-attention is all you need) to do text classification. 
 
-we implement two memory network. one is dynamic memory network. previously it reached state of art in question answering, sentiment analysis and sequence generating tasks. it is so called one model to do serveral different tasks, and reach high performance. it has four modules. the key component is episodic memory module. it use gate mechanism to performance attention, and use gated-gru to update episode memory, then it has another gru( in a vertical direction) to pefromance hidden state update. it has ability to do transitive inference.
+and these two models can also be used for sequences generating and other tasks. if your task is a multi-label classification, 
 
-the second memory network we implemented is recurrent entity network: tracking state of the world. it has blocks of key-value pairs as memory, run in parallel, which achieve new state of art. it can be used for modelling question answering with contexts(or history). for example, you can let the model to read some sentences(as context), and ask a question(as query), then ask the model to predict an answer; if you feed story same as query, then it can do classification task. 
+you can cast the problem to sequences generating.
 
-if you need some sample data and word embedding pertrained on word2vec, you can find it in closed issues, such as:<a href="https://github.com/brightmart/text_classification/issues/3">issue 3</a>. 
+we implement two memory network. one is dynamic memory network. previously it reached state of art in question 
 
-you can also find some sample data at folder "data". it contains two files:'sample_single_label.txt', contains 50k data with single label; 'sample_multiple_label.txt', contains 20k data with multiple labels. input and label of is separate by "   __label__".
+answering, sentiment analysis and sequence generating tasks. it is so called one model to do several different tasks, 
 
-if you want to know more detail about dataset of text classification or task these models can be used, one of choose is below:
-https://biendata.com/competition/zhihu/
+and reach high performance. it has four modules. the key component is episodic memory module. it use gate mechanism to 
 
+performance attention, and use gated-gru to update episode memory, then it has another gru( in a vertical direction) to 
+
+performance hidden state update. it has ability to do transitive inference.
+
+the second memory network we implemented is recurrent entity network: tracking state of the world. it has blocks of 
+
+key-value pairs as memory, run in parallel, which achieve new state of art. it can be used for modelling question 
+
+answering with contexts(or history). for example, you can let the model to read some sentences(as context), and ask a 
+
+question(as query), then ask the model to predict an answer; if you feed story same as query, then it can do 
+
+classification task. 
 
 Models:
 -------------------------------------------------------------------------
 
 1) fastText
-2) TextCNN   
-3) TextRNN    
-4) RCNN     
-5) Hierarchical Attention Network    
-6) seq2seq with attention   
-7) Transformer("Attend Is All You Need")
-8) Dynamic Memory Network
-9) EntityNetwork:tracking state of the world
-10) Ensemble models
-11) Boosting: 
+2) TextCNN 
+3) Bert:Pre-training of Deep Bidirectional Transformers for Language Understanding  
+4) TextRNN    
+5) RCNN     
+6) Hierarchical Attention Network    
+7) seq2seq with attention   
+8) Transformer("Attend Is All You Need")
+9) Dynamic Memory Network
+10) EntityNetwork:tracking state of the world
+11) Ensemble models
+12) Boosting: 
 
     for a single model, stack identical models together. each layer is a model. the result will be based on logits added together. the only connection between layers are label's weights. the front layer's prediction error rate of each label will become weight for the next layers. those labels with high error rate will have big weight. so later layer's will pay more attention to those mis-predicted labels, and try to fix previous mistake of former layer. as a result, we will get a much strong model.
     check a00_boosting/boosting.py
@@ -73,10 +91,14 @@ Model   | fastText|TextCNN|TextRNN| RCNN | HierAtteNet|Seq2seqAttn|EntityNet|Dyn
 Score   | 0.362   |  0.405| 0.358 | 0.395| 0.398      |0.322      |0.400    |0.392        |0.322
 Training| 10m     |  2h   |10h    | 2h   | 2h         |3h         |3h       |5h           |7h
 --------------------------------------------------------------------------------------------------
-
+ 
+ Bert model achieves 0.368 after first 9 epoch from validation set.
+ 
  Ensemble of TextCNN,EntityNet,DynamicMemory: 0.411
  
  Ensemble EntityNet,DynamicMemory: 0.403
+ 
+
  
  --------------------------------------------------------------------------------------------------
  
@@ -104,14 +126,82 @@ Each model has a test method under the model class. you can run the test method 
 
 Environment:
 -------------------------------------------------------------------------------------------------------
-python 2.7+ tensorflow 1.1
+python 2.7+ tensorflow 1.8 
 
-(tensorflow 1.2,1.3,1.4 also works; most of models should also work fine in other tensorflow version, since we use very few features bond to certain version; if you use python 3.5, it will be fine as long as you change print/try catch function)
+(tensorflow 1.1 to 1.13 should also works; most of models should also work fine in other tensorflow version, since we 
+
+use very few features bond to certain version.
+
+if you use python3, it will be fine as long as you change print/try catch function in case you meet any error.
 
 TextCNN model is already transfomed to python 3.6
 
--------------------------------------------------------------------------
 
+Sample data: <a href='https://pan.baidu.com/s/1yWZf2eAPxq15-r2hHk2M-Q'>cached file </a>
+-------------------------------------------------------------------------------------------------------
+to help you run this repository, currently we re-generate training/validation/test data and vocabulary/labels, and saved 
+
+them as cache file using h5py. we suggest you to download it from above link.
+
+it contain everything you need to run this repository: data is pre-processed, you can start to train the model in a minute.
+  
+it's a zip file about 1.8G, contains 3 million training data. although after unzip it's quite big, but with the help of 
+
+hdf5, it only need a normal size of memory of computer(e.g.8 G or less) during training.
+
+we use jupyter notebook: <a href='https://github.com/brightmart/text_classification/blob/master/pre-processing.ipynb'>pre-processing.ipynb</a> to pre-process data. you can have a better understanding of this task and 
+
+data by taking a look of it. you can also generate data by yourself in the way your want, just change few lines of code 
+
+using this jupyter notebook.
+
+If you want to try a model now, you can dowload cached file from above, then go to folder 'a02_TextCNN', run 
+        
+     python  p7_TextCNN_train.py 
+   
+it will use data from cached files to train the model, and print loss and F1 score periodically.
+
+old sample data source:
+if you need some sample data and word embedding per-trained on word2vec, you can find it in closed issues, such as: <a href="https://github.com/brightmart/text_classification/issues/3">issue 3</a>. 
+
+you can also find some sample data at folder "data". it contains two files:'sample_single_label.txt', contains 50k data 
+
+with single label; 'sample_multiple_label.txt', contains 20k data with multiple labels. input and label of is separate by "   __label__".
+
+if you want to know more detail about data set of text classification or task these models can be used, one of choose is below:
+
+https://biendata.com/competition/zhihu/
+
+Road Map
+-------------------------------------------------------------------------------------------------------
+One way you can use this repository:
+ 
+step 1: you can read through this article. you will get a general idea of various classic models used to do text classification.
+
+step 2: pre-process data and/or download cached file.
+
+      a. take a look a look of jupyter notebook('pre-processing.ipynb'), where you can familiar with this text 
+
+           classification task and data set. you will also know how we pre-process data and generate training/validation/test 
+           
+           set. there are a list of things you can try at the end of this jupyter.
+
+       b. download zip file that contains cached files, so you will have all necessary data, and can start to train models.
+
+step 3: run some of models list here, and change some codes and configurations as you want, to get a good performance.
+
+      record performances, and things you done that works, and things that are not.
+
+      for example, you can take this sequence to explore: 
+      
+      1) fasttext---> 2)TextCNN---> 3)Transformer---> 4)BERT
+
+additionally, write your article about this topic, you can follow paper's style to write. you may need to read some papers
+       
+       on the way, many of these papers list in the # Reference at the end of this article; or join  a machine learning 
+       
+       competition, and apply it with what you've learned. 
+       
 Use Your Own Data:
 -------------------------------------------------------------------------------------------------------
 replace data in 'data/sample_multiple_label.txt', and make sure format as below:
@@ -191,7 +281,118 @@ Finally, we will use linear layer to project these features to per-defined label
 -------------------------------------------------------------------------
 
 
-3.TextRNN
+3.BERT: 
+-------------------------------------------------------------------------
+#### Pre-training of Deep Bidirectional Transformers for Language Understanding 
+
+BERT currently achieve state of art results on more than 10 NLP tasks. the key ideas behind this model is that we can 
+
+pre-train the model by using one kind of language model with huge amount of raw data, where you can find it easily.
+
+as most of parameters of the model is pre-trained, only last layer for classifier need to be need for different tasks.
+
+as a result, this model is generic and very powerful. you can just fine-tuning based on the pre-trained model within
+ 
+a short period of time.
+ 
+however, this model is quite big. with sequence length 128, you may only able to train with a batch size of 32; for long
+
+document such as sequence length 512, it can only train a batch size 4 for a normal GPU(with 11G); and very few people
+
+can pre-train this model from scratch, as it takes many days or weeks to train, and a normal GPU's memory is too small 
+
+for this model.
+
+Specially, the backbone model is Transformer, where you can find it in Attention Is All You Need. it use two kind of 
+
+tasks to pre-train the model.
+
+#### Masked Languge Model
+generally speaking, given a sentence, some percentage of words are masked, you will need to predict the masked words
+
+based on this masked sentence. masked words are chosed randomly.
+
+we feed the input through a deep Transformer encoder and then use the final hidden states corresponding to the masked 
+
+positions to predict what word was masked, exactly like we would train a language model.
+
+    source_file each line is a sequence of token, can be a sentence.
+    
+    Input Sequence  : The man went to [MASK] store with [MASK] dog
+    Target Sequence :                  the                his
+         
+
+#### Next Sentence Prediction
+many language understanding task, like question answering, inference, need understand relationship
+  
+between sentence. however, language model is only able to understand without a sentence. next sentence
+
+prediction is a sample task to help model understand better in these kinds of task.
+
+50% of chance the second sentence is tbe next sentence of the first one, 50% of not the next one.
+
+given two sentence, the model is asked to predict whether the second sentence is real next sentence of 
+
+the first one.
+  
+    Input : [CLS] the man went to the store [SEP] he bought a gallon of milk [SEP]
+    Label : IsNext
+
+    Input = [CLS] the man heading to the store [SEP] penguin [MASK] are flight ##less birds [SEP]
+    Label = NotNext
+    
+<img src="https://github.com/brightmart/text_classification/blob/master/images/bert_1.jpeg"  width="65%" height="65%" />
+
+<img src="https://github.com/brightmart/text_classification/blob/master/images/bert_2.jpeg"  width="65%" height="65%" />
+
+
+#### How to use BERT?
+
+basically, you can download pre-trained model, can just fine-tuning on your task with your own data.
+
+for classification task, you can add processor to define the format you want to let input and labels from source data.
+
+#### Use BERT for multi-label classification?
+
+run the following command under folder a00_Bert:
+ 
+      python  train_bert_multi-label.py
+   
+It achieve 0.368 after 9 epoch.
+or you can run multi-label classification with downloadable data using BERT from 
+
+<a href='https://github.com/brightmart/sentiment_analysis_fine_grain'>sentiment_analysis_fine_grain with BERT</a>
+ 
+#### Use BERT for online prediction 
+
+you can use session and feed style to restore model and feed data, then get logits to make a online prediction.
+
+<a href='https://github.com/brightmart/sentiment_analysis_fine_grain'>online prediction with BERT</a>
+
+originally, it train or evaluate model based on file, not for online.
+
+#### How to get better model for BERT?
+
+firstly, you can use pre-trained model download from google. run a few epoch on you dataset, and find a suitable 
+
+sequence length.
+
+secondly, you can pre-train the base model in your own data as long as  you can find a dataset that is related to 
+
+your task, then fine-tuning on your specific task.
+
+thirdly, you can change loss function and last layer to better suit for your task.
+
+additionally, you can add define some pre-trained tasks that will help the model understand your task much better.
+
+as experienced we got from experiments, pre-trained task is independent from model and pre-train is not limit to 
+
+the tasks above.
+
+-------------------------------------------------------------------------
+
+
+4.TextRNN
 -------------
 Structure v1:embedding--->bi-directional lstm--->concat output--->average----->softmax layer
 
@@ -209,7 +410,7 @@ check: p8_TextRNN_model_multilayer.py
 -------------------------------------------------------------------------
 
 
-4.BiLstmTextRelation
+5.BiLstmTextRelation
 -------------
 Structure same as TextRNN. but input is special designed. e.g.input:"how much is the computer? EOS price of laptop". where 'EOS' is a special
 token spilted question1 and question2.
@@ -220,7 +421,7 @@ check:p9_BiLstmTextRelation_model.py
 -------------------------------------------------------------------------
 
 
-5.twoCNNTextRelation
+6.twoCNNTextRelation
 -------------
 Structure: first use two different convolutional to extract feature of two sentences. then concat two features. use linear
 transform layer to out projection to target label, then softmax.
@@ -231,7 +432,7 @@ check: p9_twoCNNTextRelation_model.py
 -------------------------------------------------------------------------
 
 
-6.BiLstmTextRelationTwoRNN
+7.BiLstmTextRelationTwoRNN
 -------------
 Structure: one bi-directional lstm for one sentence(get output1), another bi-directional lstm for another sentence(get output2). then:
 softmax(output1*M*output2)
@@ -244,7 +445,7 @@ for more detail you can go to: <a herf="http://www.wildml.com/2016/07/deep-learn
 -------------------------------------------------------------------------
 
 
-7.RCNN:
+8.RCNN:
 -------------
 Recurrent convolutional neural network for text classification
 
@@ -264,7 +465,7 @@ check: p71_TextRCNN_model.py
 
 -------------------------------------------------------------------------
 
-8.Hierarchical Attention Network:
+9.Hierarchical Attention Network:
 -------------
 Implementation of <a href="https://www.cs.cmu.edu/~diyiy/docs/naacl16.pdf">Hierarchical Attention Networks for Document Classification</a>
 
@@ -316,7 +517,7 @@ for attentive attention you can check <a href='https://github.com/brightmart/tex
 
 -------------------------------------------------------------------------
 
-9.Seq2seq with attention
+10.Seq2seq with attention
 -------------
 Implementation seq2seq with attention derived from <a href="https://arxiv.org/pdf/1409.0473.pdf">NEURAL MACHINE TRANSLATION BY JOINTLY LEARNING TO ALIGN AND TRANSLATE</a>
 
@@ -360,7 +561,7 @@ V.Notices:
 
 -------------------------------------------------------------------------
 
-10.Transformer("Attention Is All You Need")
+11.Transformer("Attention Is All You Need")
 -------------
 Status: it was able to do task classification. and able to generate reverse order of its sequences in toy task. you can check it by running test function in the model. check: a2_train_classification.py(train) or a2_transformer_classification.py(model)
 
@@ -368,7 +569,7 @@ we do it in parallell style.layer normalization,residual connection, and mask ar
 
 For every building blocks, we include a test function in the each file below, and we've test each small piece successfully.
 
-Sequence to sequence with attention is a typical model to solve sequence generation problem, such as translate, dialogue system. most of time, it use RNN as buidling block to do these tasks. util recently, people also apply convolutional Neural Network for sequence to sequence problem. Transformer, however, it perform these tasks solely on attention mechansim. it is fast and acheive new state-of-art result.
+Sequence to sequence with attention is a typical model to solve sequence generation problem, such as translate, dialogue system. most of time, it use RNN as buidling block to do these tasks. util recently, people also apply convolutional Neural Network for sequence to sequence problem. Transformer, however, it perform these tasks solely on attention mechansim. it is fast and achieve new state-of-art result.
 
 ![alt text](https://github.com/brightmart/text_classification/blob/master/images/attention_is_all_you_need.JPG)
 
@@ -404,7 +605,7 @@ for detail of the model, please check: a2_transformer_classification.py
 
 -------------------------------------------------------------------------
 
-11.Recurrent Entity Network
+12.Recurrent Entity Network
 -------------------------------------------------------------------------
 Input:1. story: it is multi-sentences, as context. 2.query: a sentence, which is a question, 3. ansewr: a single label.
 
@@ -445,7 +646,7 @@ under this model, it has a test function, which ask this model to count numbers 
 
 -------------------------------------------------------------------------
 
-12.Dynamic Memory Network
+13.Dynamic Memory Network
 -------------------------------------------------------------------------
 Outlook of Model:
 
@@ -486,7 +687,6 @@ Detail:
 4.Answer Module:
 take the final epsoidic memory, question, it update hidden state of answer module.
 
--------------------------------------------------------------------------
 
 TODO 
 -------------------------------------------------------------------------------------------------------
@@ -542,6 +742,9 @@ Reference:
 
 11.Ensemble Selection from Libraries of Models
 
+12.<a href='https://arxiv.org/abs/1810.04805'>BERT:Pre-training of Deep Bidirectional Transformers for Language Understanding</a>
+
+13.<a href='https://github.com/google-research/bert'>google-research/bert</a>
 
 -------------------------------------------------------------------------
 

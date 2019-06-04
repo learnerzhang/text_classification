@@ -1,5 +1,5 @@
-from  p7_TextCNN_predict import get_logits_with_value_by_input
-from p7_TextCNN_predict_exp import get_logits_with_value_by_input_exp
+from .p7_TextCNN_predict import get_logits_with_value_by_input
+from .p7_TextCNN_predict_exp import get_logits_with_value_by_input_exp
 import tensorflow as tf
 def main(_):
     for start in range(217360):

@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 # prediction using model.
 # process--->1.load data(X:list of lint,y:int). 2.create session. 3.feed data. 4.predict
-import sys
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 import tensorflow as tf
 import numpy as np
 # from p5_fastTextB_model import fastTextB as fastText
@@ -13,7 +9,7 @@ from a02_TextCNN.other_experiement.data_util_zhihu import load_data_predict, loa
 from tflearn.data_utils import pad_sequences  # to_categorical
 import os
 import codecs
-from p7_TextCNN_model import TextCNN
+from .p7_TextCNN_model import TextCNN
 
 # configuration
 FLAGS = tf.app.flags.FLAGS
@@ -177,6 +173,37 @@ def write_question_id_with_labels(question_id, labels_list, f):
     labels_string = ",".join(labels_list)
     f.write(question_id + "," + labels_string + "\n")
 
+
+def load_data(cache_file_h5py,cache_file_pickle):
+    """
+    load data from h5py and pickle cache files, which is generate by take step by step of pre-processing.ipynb
+    :param cache_file_h5py:
+    :param cache_file_pickle:
+    :return:
+    """
+    if not os.path.exists(cache_file_h5py) or not os.path.exists(cache_file_pickle):
+        raise RuntimeError("############################ERROR##############################\n. "
+                           "please download cache file, it include training data and vocabulary & labels. "
+                           "link can be found in README.md\n download zip file, unzip it, then put cache files as FLAGS."
+                           "cache_file_h5py and FLAGS.cache_file_pickle suggested location.")
+    print("INFO. cache file exists. going to load cache file")
+    f_data = h5py.File(cache_file_h5py, 'r')
+    print("f_data.keys:",list(f_data.keys()))
+    train_X=f_data['train_X'] # np.array(
+    print("train_X.shape:",train_X.shape)
+    train_Y=f_data['train_Y'] # np.array(
+    print("train_Y.shape:",train_Y.shape,";")
+    vaild_X=f_data['vaild_X'] # np.array(
+    valid_Y=f_data['valid_Y'] # np.array(
+    test_X=f_data['test_X'] # np.array(
+    test_Y=f_data['test_Y'] # np.array(
+    #f_data.close()
+
+    word2index, label2index=None,None
+    with open(cache_file_pickle, 'rb') as data_f_pickle:
+        word2index, label2index=pickle.load(data_f_pickle)
+    print("INFO. cache file load successful...")
+    return word2index, label2index,train_X,train_Y,vaild_X,valid_Y,test_X,test_Y
 
 if __name__ == "__main__":
     # tf.app.run()

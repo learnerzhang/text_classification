@@ -7,6 +7,21 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.DEBUG)
 
 
+def variable_summaries(var):
+    """Attach a lot of summaries to a Tensor"""
+    with tf.name_scope("summaries"):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar("mean", mean)
+
+        with tf.name_scope("stddev"):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+
+        tf.summary.scalar("stddev", stddev)
+        tf.summary.scalar("max", tf.reduce_mean(var))
+        tf.summary.scalar("min", tf.reduce_min(var))
+        tf.summary.histogram("histogram", var)
+
+
 class TextCNN:
     """
         # TextCNN:
@@ -79,13 +94,18 @@ class TextCNN:
             # [vocab_size,embed_size] tf.random_uniform([self.vocab_size, self.embed_size],-1.0,1.0)
             self.Embedding = tf.get_variable("Embedding", shape=[self.vocab_size, self.embed_size],
                                              initializer=self.initializer)
+            variable_summaries(self.Embedding)
 
+        with tf.name_scope("weights"):
             # [embed_size,label_size]
             self.W_projection = tf.get_variable("W_projection", shape=[self.num_filters_total, self.num_classes],
                                                 initializer=self.initializer)
+            variable_summaries(self.W_projection)
+        with tf.name_scope("biases"):
             # [label_size] #ADD 2017.06.09
             self.b_projection = tf.get_variable("b_projection",
                                                 shape=[self.num_classes])
+            variable_summaries(self.b_projection)
 
     def inference(self):
         """
@@ -123,7 +143,6 @@ class TextCNN:
                 conv, self.update_ema = self.batchnorm(conv, self.tst, self.iter, self.b1)  # TODO remove it temp
                 # ====>c. apply nolinearity
                 b = tf.get_variable("b-%s" % filter_size, [self.num_filters])  # ADD 2017-06-09
-
                 # shape:[batch_size,sequence_length - filter_size + 1,1,num_filters]. tf.nn.bias_add:adds `bias` to `value`
                 h = tf.nn.relu(tf.nn.bias_add(conv, b), name="relu")
                 # ====>. max-pooling.  value: A 4-D `Tensor` with shape `[batch, height, width, channels]
@@ -152,8 +171,9 @@ class TextCNN:
         self.h_drop = tf.layers.dense(self.h_drop, self.num_filters_total, activation=tf.nn.tanh, use_bias=True)
         # 5. logits(use linear layer)and predictions(argmax)
         with tf.name_scope("output"):
-            logits = tf.matmul(self.h_drop,
-                               self.W_projection) + self.b_projection  # shape:[None, self.num_classes]==tf.matmul([None,self.embed_size],[self.embed_size,self.num_classes])
+            # shape:[None, self.num_classes]==tf.matmul([None,self.embed_size],[self.embed_size,self.num_classes])
+            logits = tf.matmul(self.h_drop, self.W_projection) + self.b_projection
+            tf.summary.histogram("logists", logits)
         return logits
 
     def batchnorm(self, Ylogits, is_test, iteration, offset,
@@ -167,8 +187,8 @@ class TextCNN:
         :param convolutional:
         :return:
         """
-        exp_moving_avg = tf.train.ExponentialMovingAverage(0.999,
-                                                           iteration)  # adding the iteration prevents from averaging across non-existing iterations
+        # adding the iteration prevents from averaging across non-existing iterations
+        exp_moving_avg = tf.train.ExponentialMovingAverage(0.999, iteration)
         bnepsilon = 1e-5
         if convolutional:
             mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
@@ -195,6 +215,7 @@ class TextCNN:
             l2_losses = tf.add_n(
                 [tf.nn.l2_loss(v) for v in tf.trainable_variables() if 'bias' not in v.name]) * l2_lambda
             loss = loss + l2_losses
+            tf.summary.scalar("loss", loss)  # loss -> scalar
         return loss
 
     def loss(self, l2_lambda=0.0001):  # 0.001
@@ -223,7 +244,7 @@ class TextCNN:
 # test started. toy task: given a sequence of data. compute it's label: sum of its previous element,itself and next element greater than a threshold, it's label is 1,otherwise 0.
 # e.g. given inputs:[1,0,1,1,0]; outputs:[0,1,1,1,0].
 # invoke test() below to test the model in this toy task.
-def test():
+def main():
     # below is a function test; if you use this for text classifiction, you need to transform sentence to indices of vocabulary first. then feed data to the graph.
     num_classes = 5
     learning_rate = 0.001
@@ -241,6 +262,9 @@ def test():
     textRNN = TextCNN(filter_sizes, num_filters, num_classes, learning_rate, batch_size, decay_steps, decay_rate,
                       sequence_length, vocab_size, embed_size, is_training, multi_label_flag=multi_label_flag)
     with tf.Session() as sess:
+        merged = tf.summary.merge_all()
+        train_writer = tf.summary.FileWriter('/tmp/textcnn_train', sess.graph)
+        test_writer = tf.summary.FileWriter('/tmp/textcnn_test')
         sess.run(tf.global_variables_initializer())
         for i in range(500):
             input_x = np.random.randn(batch_size, sequence_length)  # [None, self.sequence_length]
@@ -248,10 +272,11 @@ def test():
             input_x[input_x < 0] = 0
             logging.info("input-x")
             input_y_multilabel = get_label_y(input_x)
-            loss, possibility, W_projection_value, _ = sess.run(
-                [textRNN.loss_val, textRNN.possibility, textRNN.W_projection, textRNN.train_op],
+            summary, loss, possibility, W_projection_value, _ = sess.run(
+                [merged, textRNN.loss_val, textRNN.possibility, textRNN.W_projection, textRNN.train_op],
                 feed_dict={textRNN.input_x: input_x, textRNN.input_y_multilabel: input_y_multilabel,
                            textRNN.dropout_keep_prob: dropout_keep_prob, textRNN.tst: False})
+            train_writer.add_summary(summary, i)  # 训练数据集产生的
             logging.info('%sth iter %s> loss: %s' % (i, 10 * '-', loss))
             # print("label:", input_y_multilabel)  # print("possibility:",possibility)
 
@@ -283,4 +308,4 @@ def compute_single_label(listt):
 
 
 if __name__ == '__main__':
-    test()
+    main()
